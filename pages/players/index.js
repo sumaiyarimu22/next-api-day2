@@ -6,6 +6,9 @@ const Players = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [playerName, setPlayerName] = useState("");
+  const [countryName, setCountryName] = useState("");
+
   useEffect(() => {
     const getPlayers = async () => {
       try {
@@ -26,6 +29,39 @@ const Players = () => {
     getPlayers();
   }, []);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    //creating a player new object
+    const playerObj = {
+      id: Date.now(),
+      name: playerName,
+      country: countryName,
+    };
+
+    //sending post request
+    const res = await fetch("/api/players", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(playerObj),
+    });
+    const data = await res.json();
+
+    //check if res.ok is false
+    if (!res.ok) {
+      console.log("Faild to set data");
+    }
+    //check if res.ok is true
+    if (res.ok) {
+      console.log("Success", data);
+    }
+
+    //update new data to the players state
+    setPlayers([...players, data]);
+  };
+
   if (isLoading) {
     return (
       <div>
@@ -43,8 +79,25 @@ const Players = () => {
   }
   return (
     <div>
+      <h2>Add a new player</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Enter a player name"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Enter a country name"
+          value={countryName}
+          onChange={(e) => setCountryName(e.target.value)}
+        />
+        <button type="submit">add player</button>
+      </form>
+
       <h2>players</h2>
-      {players.map((player) => (
+      {players?.map((player) => (
         <PlayerItem key={player.id} player={player} />
       ))}
     </div>
